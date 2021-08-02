@@ -8,7 +8,7 @@
 - [ ] Custom email address to use with doi.crossref.org
 - [ ] Test unreleased changes on firefox & edge, and also check permissions differences amongst different browsers
 
-## Unreleased
+## v0.2.0
 
 ### Added
 - [#28](https://github.com/gchenfc/sci-hub-now/pull/28) Add default keyboard shortcuts
