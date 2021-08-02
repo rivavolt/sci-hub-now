@@ -1,0 +1,5 @@
+data export-ignore
+data/ export-ignore
+icons/outline.sh export-ignore
+.gitignore export-ignore
+.gitattributes export-ignore
