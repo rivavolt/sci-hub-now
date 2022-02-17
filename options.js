@@ -215,7 +215,7 @@ function fillUrls() {
       console.log(links);
       for (const i in links) {
         linkstable.rows[parseInt(i) + 1].bgColor = "#aaa";
-        checkServerStatus(links[i], i,
+        setTimeout(checkServerStatus, 250, links[i], i,
           function () {
             linkstable.rows[parseInt(i) + 1].bgColor = "lightgreen";
           }, function () {
