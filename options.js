@@ -168,7 +168,7 @@ function checkServerStatus(domain, i, ifOnline, ifProbablyOnline, ifOffline) {
     domain = domain + '/';
   checkServerStatusHelper(domain + "favicon.ico", i,
     function () {
-      checkServerStatusHelper(domain + "misc/img/raven_1.png", i,
+      checkServerStatusHelper(domain + "pictures/ravenround_hs.gif", i,
         ifOnline,
         ifProbablyOnline,
         ifProbablyOnline);
