@@ -38,13 +38,9 @@ function initializeString(propname, isUrl, alternateCallback) {
   field.onkeyup = function () {
     if (isUrl) {
       field.style.backgroundColor = "#aaa";
-      setTimeout(checkServerStatus, 250, field.value, -1,
-        function () {
-          field.style.backgroundColor = "lightgreen";
-        }, function () {
-          field.style.backgroundColor = "yellow";
-        }, function () {
-          field.style.backgroundColor = "pink";
+      master_link_count = [0, 0];
+      setTimeout(checkServerStatus, 250, field.value, function (success) {
+          update_master_link_count(field.style, success);
         });
     }
   };
@@ -163,31 +159,53 @@ chrome.storage.onChanged.addListener((changes, area) => {
 
 
 // Code related to color-coding and populating sci-hub links
-function checkServerStatus(domain, i, ifOnline, ifProbablyOnline, ifOffline) {
+let FILES_TO_CHECK = ["favicon.ico", "misc/img/raven_1.png", "pictures/ravenround_hs.gif"]
+function checkServerStatus(domain, callback) {
   if (domain.charAt(domain.length - 1) != '/')
     domain = domain + '/';
-  checkServerStatusHelper(domain + "favicon.ico", i,
-    function () {
-      checkServerStatusHelper(domain + "pictures/ravenround_hs.gif", i,
-        ifOnline,
-        ifProbablyOnline,
-        ifProbablyOnline);
-    },
-    ifOffline,
-    function () { });
+  for (const file of FILES_TO_CHECK.values())
+    checkServerStatusHelper(domain + file, callback);
 }
-function checkServerStatusHelper(testurl, i, ifOnline, ifOffline, ifWaiting) {
+function checkServerStatusHelper(testurl, callback) {
   var img = document.body.appendChild(document.createElement("img"));
   img.height = 0;
   img.visibility = "hidden";
-  ifWaiting && ifWaiting.constructor == Function && ifWaiting(i);
   img.onload = function () {
-    ifOnline && ifOnline.constructor == Function && ifOnline(i);
+    callback && callback.constructor == Function && callback(true);
   };
   img.onerror = function () {
-    ifOffline && ifOffline.constructor == Function && ifOffline(i);
+    callback && callback.constructor == Function && callback(false);
   }
   img.src = testurl;
+}
+var master_link_count = [0, 0];
+function update_master_link_count(obj, success) {
+  master_link_count[0] += 1
+  if (success) master_link_count[1] += 1;
+  console.log("from url link, we got a " + success + ", counts is now:", master_link_count);
+  if ((master_link_count[1] == 0) && (master_link_count[0] == FILES_TO_CHECK.length)) {
+    obj.backgroundColor = "pink";
+  } else if (master_link_count[1] == 1) {
+    obj.backgroundColor = "yellow";
+  } else if (master_link_count[1] > 1) {
+    obj.backgroundColor = "lightgreen";
+  }
+  console.log("colored: ", obj);
+}
+var links_counts = [];
+function update_counts(i, success) {
+  var counts = links_counts[i];
+  counts[0] += 1;
+  if (success) counts[1] += 1;
+  console.log("from link: " + i + ", we got a " + success + ", counts is now:", links_counts);
+  if ((counts[1] == 0) && (counts[0] == FILES_TO_CHECK.length)) {
+    linkstable.rows[i + 1].bgColor = "pink";
+  } else if (counts[1] == 1) {
+    linkstable.rows[i + 1].bgColor = "yellow";
+  } else if (counts[1] > 1) {
+    linkstable.rows[i + 1].bgColor = "lightgreen";
+  }
+  console.log("colored: ", linkstable.rows[i + 1]);
 }
 
 // Fetch data from database
@@ -210,6 +228,7 @@ function fillUrls() {
     if (this.readyState == 4 && this.status == 200) {
       links = JSON.parse(this.responseText);
       for (const i in links) {
+        links_counts.push([0, 0]);
         linkstable.insertRow();
         linkstable.rows[linkstable.rows.length - 1].innerHTML = "<td>" + links[i] + '</td><button id="link' + i + '">Select</button>';
         document.getElementById("link" + i).onclick = function () { setUrl(i); }
@@ -218,14 +237,9 @@ function fillUrls() {
       console.log(links);
       for (const i in links) {
         linkstable.rows[parseInt(i) + 1].bgColor = "#aaa";
-        setTimeout(checkServerStatus, 250, links[i], i,
-          function () {
-            linkstable.rows[parseInt(i) + 1].bgColor = "lightgreen";
-          }, function () {
-            linkstable.rows[parseInt(i) + 1].bgColor = "yellow";
-          }, function () {
-            linkstable.rows[parseInt(i) + 1].bgColor = "pink";
-          })
+        setTimeout(checkServerStatus, 250, links[i], function (success) {
+          update_counts(parseInt(i), success)
+        })
       }
     }
   };
