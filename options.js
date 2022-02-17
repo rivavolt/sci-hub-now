@@ -191,7 +191,7 @@ function checkServerStatusHelper(testurl, i, ifOnline, ifOffline, ifWaiting) {
 }
 
 // Fetch data from database
-const databaseRoot = "https://raw.githubusercontent.com/gchenfc/sci-hub-now/release/v0.2.0/data/";
+const databaseRoot = "https://raw.githubusercontent.com/gchenfc/sci-hub-now/release/v0.2.1/data/";
 // const databaseRoot = "data/"; // For local testing
 // fetch urls
 var links;
