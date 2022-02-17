@@ -37,7 +37,8 @@ function initializeString(propname, isUrl, alternateCallback) {
   };
   field.onkeyup = function () {
     if (isUrl) {
-      checkServerStatus(field.value, -1,
+      field.style.backgroundColor = "#aaa";
+      setTimeout(checkServerStatus, 250, field.value, -1,
         function () {
           field.style.backgroundColor = "lightgreen";
         }, function () {
@@ -215,7 +216,7 @@ function fillUrls() {
       console.log(links);
       for (const i in links) {
         linkstable.rows[parseInt(i) + 1].bgColor = "#aaa";
-        checkServerStatus(links[i], i,
+        setTimeout(checkServerStatus, 250, links[i], i,
           function () {
             linkstable.rows[parseInt(i) + 1].bgColor = "lightgreen";
           }, function () {
