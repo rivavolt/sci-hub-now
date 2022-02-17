@@ -38,6 +38,7 @@ function initializeString(propname, isUrl, alternateCallback) {
   field.onkeyup = function () {
     if (isUrl) {
       field.style.backgroundColor = "#aaa";
+      master_link_count = [0, 0];
       setTimeout(checkServerStatus, 250, field.value, function (success) {
           update_master_link_count(field.style, success);
         });
