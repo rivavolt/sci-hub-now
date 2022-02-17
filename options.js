@@ -37,6 +37,7 @@ function initializeString(propname, isUrl, alternateCallback) {
   };
   field.onkeyup = function () {
     if (isUrl) {
+      field.style.backgroundColor = "#aaa";
       setTimeout(checkServerStatus, 250, field.value, -1,
         function () {
           field.style.backgroundColor = "lightgreen";
