@@ -121,31 +121,62 @@ chrome.permissions.onRemoved.addListener(function (permissions) {
   }
 });
 
-// Check server alive status
-function checkServerStatus(url) {
+/************* BEGIN SERVER ALIVE CHECKING CODE ****************** */
+let FILES_TO_CHECK = ["favicon.ico", "misc/img/raven_1.png", "pictures/ravenround_hs.gif"]
+function checkServerStatus(domain) {
+  var counts = [0, 0];
+  var sent_message = false;
+
+  console.log("CHECKING SERVER STATUS FOR ", domain);
+
+  if (domain.charAt(domain.length - 1) != '/')
+    domain = domain + '/';
+  for (const file of FILES_TO_CHECK.values())
+    checkServerStatusHelper(domain + file, function (success) {
+      if (sent_message) { return; }
+      console.log("IN CALLBACK! counts is ", counts);
+      counts[0] += 1;
+      if (success) counts[1] += 1;
+      if (counts[0] < FILES_TO_CHECK.length) { return; }
+      if ((counts[1] == 0)) {
+        if (confirm("Looks like the mirror " + domain + " is dead.  Would you like to go to the options page to select a different mirror?")) {
+          browser.tabs.create({ url: 'chrome://extensions/?options=' + chrome.runtime.id }).then();
+        }
+      } else if (counts[1] == 1) {
+        if (confirm("We detected that the mirror " + domain + " might be dead." +
+          "\nIf the page/pdf actually loaded correctly, then there's no need for action and you may consider going to the options page to disable \"Auto-check sci-hub mirror on each paper request\"." +
+          "\nWould you like to go to the options page to select a different mirror or to turn off auto-checking?")) {
+          browser.tabs.create({ url: 'chrome://extensions/?options=' + chrome.runtime.id }).then();
+        }
+      } else {
+        // all good
+      }
+      sent_message = true;
+    });
+  
+  setTimeout(function () {
+    if (sent_message) { return; }
+    if (counts[0] < FILES_TO_CHECK.length) {
+      if (confirm("Looks like the mirror " + domain + " is dead.  Would you like to go to the options page to select a different mirror?")) {
+        browser.tabs.create({ url: 'chrome://extensions/?options=' + chrome.runtime.id }).then();
+      }
+    }
+    sent_message = true;
+  }, 2000);
+}
+function checkServerStatusHelper(testurl, callback) {
   var img = document.body.appendChild(document.createElement("img"));
   img.height = 0;
   img.visibility = "hidden";
-  img.onerror = function () {
-    var img2 = document.body.appendChild(document.createElement("img"));
-    img2.height = 0;
-    img2.visibility = "hidden";
-    img2.onload = function () { // didn't load raven but did load favicon
-      if (confirm("We detected that the mirror " + url + " might be dead." +
-        "\nIf the page/pdf actually loaded correctly, then there's no need for action and you may consider going to the options page to disable \"Auto-check sci-hub mirror on each paper request\"." +
-        "\nWould you like to go to the options page to select a different mirror or to turn off auto-checking?")) {
-        browser.tabs.create({ url: 'chrome://extensions/?options=' + chrome.runtime.id }).then();
-      }
-    };
-    img2.onerror = function () { // didn't load either
-      if (confirm("Looks like the mirror " + url + " is dead.  Would you like to go to the options page to select a different mirror?")) {
-        browser.tabs.create({ url: 'chrome://extensions/?options=' + chrome.runtime.id }).then();
-      }
-    };
-    img2.src = url + "/favicon.ico";
+  img.onload = function () {
+    callback && callback.constructor == Function && callback(true);
   };
-  img.src = url + "/misc/img/raven_1.png";
+  img.onerror = function () {
+    callback && callback.constructor == Function && callback(false);
+  }
+  img.src = testurl;
 }
+/************* END SERVER ALIVE CHECKING CODE ****************** */
 
 // Automatic file name lookup & pdf downloading
 function httpGet(theUrl) {
@@ -213,23 +244,34 @@ function getHtml(htmlSource) {
       }
       var pdfLink = '';
       try {
-        pdfLink = getPdfDownloadLink(httpGet(destUrl));
-        if (!pdfLink) {
-          alert("Error 23: Download link parser failed - redirecting to sci-hub...");
-          redirectToScihub(scihublink);
-        }
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.timeout = 2000;
+        xmlHttp.open("GET", destUrl, true); // false for synchronous request
+        xmlHttp.onerror = function () {
+          alert("Error 25: Failed to obtain download link - redirecting to sci-hub...");
+          redirectToScihub(destUrl);
+        };
+        xmlHttp.ontimeout = xmlHttp.onerror;
+        xmlHttp.onload = function () {
+          pdfLink = getPdfDownloadLink(xmlHttp.responseText);
+          if (!pdfLink) {
+            alert("Error 23: Download link parser failed - redirecting to sci-hub...");
+            redirectToScihub(scihublink);
+          }
+          console.log(pdfLink);
+          downloadPaper(pdfLink, createFilenameFromMetadata(metadata), destUrl);
+        };
+        xmlHttp.send(null);
       } catch (e) {
         alert("Error 24: Failed to obtain download link - redirecting to sci-hub...");
         redirectToScihub(destUrl);
         return;
       }
-      console.log(pdfLink);
-      downloadPaper(pdfLink, createFilenameFromMetadata(metadata), destUrl);
     } else {
       redirectToScihub(destUrl);
     }
     if (autoCheckServer) {
-      checkServerStatus(sciHubUrl);
+      setTimeout(checkServerStatus, 1, sciHubUrl);
     }
   } else {
     // browser.browserAction.setBadgeTextColor({ color: "white" });
