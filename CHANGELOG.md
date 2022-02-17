@@ -8,6 +8,13 @@
 - [ ] Custom email address to use with doi.crossref.org
 - [ ] Test unreleased changes on firefox & edge, and also check permissions differences amongst different browsers
 
+## v0.2.1
+
+### Modified
+* [#45](https://github.com/gchenfc/sci-hub-now/pull/45) Add https://sci-hub.ru by @RobbiNespu
+* [#50](https://github.com/gchenfc/sci-hub-now/pull/50) Bugfix: Options page hangs by @gchenfc
+* [#51](https://github.com/gchenfc/sci-hub-now/pull/51) Remove duplicate '/' in dead-link checking by @gchenfc
+
 ## v0.2.0
 
 ### Added
