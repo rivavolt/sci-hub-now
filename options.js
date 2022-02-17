@@ -164,9 +164,11 @@ chrome.storage.onChanged.addListener((changes, area) => {
 
 // Code related to color-coding and populating sci-hub links
 function checkServerStatus(domain, i, ifOnline, ifProbablyOnline, ifOffline) {
-  checkServerStatusHelper(domain + "/favicon.ico", i,
+  if (domain.charAt(domain.length - 1) != '/')
+    domain = domain + '/';
+  checkServerStatusHelper(domain + "favicon.ico", i,
     function () {
-      checkServerStatusHelper(domain + "/misc/img/raven_1.png", i,
+      checkServerStatusHelper(domain + "pictures/ravenround_hs.gif", i,
         ifOnline,
         ifProbablyOnline,
         ifProbablyOnline);
