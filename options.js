@@ -37,7 +37,7 @@ function initializeString(propname, isUrl, alternateCallback) {
   };
   field.onkeyup = function () {
     if (isUrl) {
-      checkServerStatus(field.value, function (success) {
+      setTimeout(checkServerStatus, 250, field.value, function (success) {
           update_master_link_count(field.style, success);
         });
     }
