@@ -1,5 +1,6 @@
 {
   "manifest_version": 3,
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuFZb/NaFc4D76oCeomQm6dGFsNHllVyY4oA4wp9IR6OruR15WUAYWQ6trOA1JlST+s2ZL2dHrdRWqIHQBZOtZvoEtqZR9I+FgOZ61XjcDaCcCd0LpPVehd9UAbI10wwZiqi7V/9NdIWdU1OqcVY5QNiTTdcZvuFUnIDb6D+F9FB6OgdlpgOWO11kAi7KkuSX6v0pFQRyRWyDI/b59VXXaIz1FDdxcc6s4M2Ib9iddh+bdMowdpRQmywcoY8r2cv2ikHfe0ideVVVQcLNWcHOPuAr/WyiGLZTlSrl61Clsbm2Vmw6r4frA5CISZt9dFGiDdi/mkmrGd5xjKQXqoY7hQIDAQAB",
   "name": "Sci-Hub X Now!",
   "short_name": "sci-hub-x-now",
   "version": "0.2.2",
