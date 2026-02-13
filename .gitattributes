@@ -1,5 +1,3 @@
-data export-ignore
-data/ export-ignore
 icons/outline.sh export-ignore
 package.sh export-ignore
 .gitignore export-ignore
