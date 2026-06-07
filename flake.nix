@@ -2,7 +2,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nix-crx = {
-      url = "github:andreivolt/nix-crx";
+      url = "github:rivavolt/nix-crx";
       flake = true;
     };
   };
