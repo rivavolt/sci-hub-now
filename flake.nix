@@ -1,19 +1,19 @@
 {
+  description = "sci-hub-now — open the current page's paper on Sci-Hub";
+
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    nix-crx = {
-      url = "github:rivavolt/nix-crx";
-      flake = true;
-    };
+    nix-webext.url = "github:rivavolt/nix-webext";
   };
 
-  outputs = { self, nixpkgs, nix-crx }:
+  outputs = { self, nixpkgs, nix-webext }:
     let
       forAllSystems = nixpkgs.lib.genAttrs nixpkgs.lib.systems.flakeExposed;
     in {
       packages = forAllSystems (system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
+          manifest = builtins.fromJSON (builtins.readFile ./manifest.json);
 
           extension = pkgs.stdenv.mkDerivation {
             pname = "sci-hub-now";
@@ -27,19 +27,19 @@
                     $out/share/chromium-extension/
             '';
           };
-
-          manifest = builtins.fromJSON (builtins.readFile ./manifest.json);
-
-          crxPkg = nix-crx.lib.mkCrxPackage {
-            inherit pkgs extension;
-            key = ./keys/signing.pem;
-            extId = "njiodifcdjlgicogmdibllagbcaohako";
-            version = manifest.version;
-          };
-
-        in {
-          inherit extension;
-          default = crxPkg.package;
+        in
+        # Chrome-only (no gecko id). The build feeds nix-webext a pre-assembled
+        # `extension` derivation; nix-webext emits the keyless external-extension
+        # manifest (CRX signed at activation from the sops key). extId is the
+        # stable Chrome ID the old committed key derived.
+        nix-webext.lib.mkBrowserExtension {
+          inherit pkgs extension;
+          pname = "sci-hub-now";
+          version = manifest.version;
+          extId = "njiodifcdjlgicogmdibllagbcaohako";
+          firefox = false;
+          # service_worker already in Chrome form; nothing to project.
+          transformManifest = false;
         });
     };
 }
